@@ -1,0 +1,1066 @@
+:root {
+  --page: #ffffff;
+  --surface: #f4f3f1;
+  --ink: #0a0a0a;
+  --mute: #6e6e6b;
+  --hairline: #e8e6e3;
+  --accent: #b0562f;
+  --fore-edge: #efe9de;
+
+  --display: "Josefin Sans", system-ui, sans-serif;
+  --sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: hidden; /* the shelf bleeds past the bottom edge */
+}
+
+/* ---------------------------------------------------------------------------
+ * Paper stock — a baked equivalent of the PaperTexture shader, built from its
+ * values: fiber .3 / fiberSize .2, crumples .3 / crumpleSize .35, folds .65
+ * with 5 folds, drops .2, roughness .4, contrast .3, and #9fadbc over #ffffff.
+ * Layered rather than shaded, so it costs nothing at runtime.
+ * ------------------------------------------------------------------------ */
+.stock {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stock span {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* fiber — stretched noise, so the grain runs the way pulp does */
+.stock-fiber {
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.035 0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23f)' opacity='0.55'/%3E%3C/svg%3E");
+  filter: grayscale(1) contrast(1.3);
+}
+
+/* crumple — coarser, lower-frequency noise for the tooth */
+.stock-crumple {
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23c)' opacity='0.4'/%3E%3C/svg%3E");
+  filter: grayscale(1) contrast(1.15);
+}
+
+/* five folds, soft and nearly invisible */
+.stock-folds {
+  opacity: 0.65;
+  mix-blend-mode: multiply;
+  background-image:
+    linear-gradient(96deg, transparent 17%, rgba(159, 173, 188, 0.09) 18%, transparent 19%),
+    linear-gradient(84deg, transparent 35%, rgba(159, 173, 188, 0.07) 36%, transparent 37%),
+    linear-gradient(93deg, transparent 52%, rgba(159, 173, 188, 0.09) 53%, transparent 54%),
+    linear-gradient(87deg, transparent 71%, rgba(159, 173, 188, 0.06) 72%, transparent 73%),
+    linear-gradient(95deg, transparent 88%, rgba(159, 173, 188, 0.08) 89%, transparent 90%);
+}
+
+/* drops — a few faint pooled marks */
+.stock-drops {
+  opacity: 0.2;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(120px 90px at 18% 24%, rgba(159, 173, 188, 0.5), transparent 70%),
+    radial-gradient(160px 120px at 72% 12%, rgba(159, 173, 188, 0.4), transparent 70%),
+    radial-gradient(140px 110px at 44% 78%, rgba(159, 173, 188, 0.35), transparent 70%),
+    radial-gradient(110px 90px at 88% 62%, rgba(159, 173, 188, 0.45), transparent 70%);
+}
+
+.stock-tint {
+  opacity: 0.055;
+  background: #9fadbc;
+}
+
+/* ---------------------------------------------------------------------
+ * Invariants: every band shares 64px side margins and a 45px floor.
+ * ------------------------------------------------------------------ */
+:root { --margin: 64px; --floor: 45px; }
+
+body.is-shelf { overflow: hidden; }
+body:not(.is-shelf) { overflow-y: auto; }
+
+/* Hero */
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 470px;
+  gap: 64px;
+  align-items: start;
+  padding: 52px var(--margin) 0;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--display);
+  /*
+   * "KNOWLEDGE" is one unbreakable word — at a fixed 80px it sets a hard floor
+   * on the column's width, and anything narrower pushes it over the summary
+   * beside it. Scaling with the viewport lets the column give.
+   */
+  font-size: clamp(46px, 5.6vw, 80px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.theme-label {
+  margin: 34px 0 12px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a7a5a1;
+}
+
+/*
+ * align-items matters here: a column flex container stretches its children to
+ * full width by default, which made each genre a full-width hit area with the
+ * empty space beside the word live. Now each button is only as wide as its word.
+ */
+.themes { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+
+/* Set to match "WHAT YOU'VE BEEN CIRCLING" — same size, same tracking. */
+.theme {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mute); /* small text, so it must clear 4.5:1 */
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 2.1;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+
+.theme[aria-pressed="true"] { color: var(--ink); font-weight: 600; }
+
+.band-right { padding-top: 26px; }
+
+.rule { display: block; height: 1px; background: var(--ink); }
+
+.hero-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.hero-head-left {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+
+.hero-head-right {
+  white-space: nowrap; /* the count never breaks away from its label */
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mute);
+}
+
+.summary-body {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.summary-from {
+  margin: 14px 0 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mute);
+}
+
+/* Controls */
+.controls-unused {
+  position: relative;
+  z-index: 1;
+  padding: 30px var(--margin) 0;
+}
+
+.sources { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.source {
+  padding: 8px 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.source:hover { color: var(--ink); }
+
+.source[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+/* Not a filter chip — in a row of app names, an "add" chip reads as one. */
+/* The only button in the hero, alone on its line. */
+.save-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  margin-top: 26px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+/* the plus, drawn from two bars */
+.plus { position: relative; width: 10px; height: 10px; flex: none; }
+.plus i { position: absolute; background: #ffffff; }
+.plus i:first-child { top: 4.5px; left: 0; width: 10px; height: 1.5px; }
+.plus i:last-child { top: 0; left: 4.25px; width: 1.5px; height: 10px; }
+.save-link:hover { background: #8e4224; }
+
+/* Shelf */
+.shelf {
+  position: fixed;
+  right: var(--margin);
+  bottom: var(--floor);
+  left: var(--margin);
+  z-index: 1;
+  /*
+   * A hovered book rises 22px, and the tallest ones were being cut off at the
+   * frame's top edge — the box is only as tall as its content and clips what
+   * leaves it. The padding gives the lift somewhere to go; the row is
+   * bottom-aligned, so the spines still stand on the same line.
+   */
+  padding-top: 36px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  scrollbar-width: none;
+}
+
+.shelf::-webkit-scrollbar { display: none; }
+.shelf.is-dragging { cursor: grabbing; }
+
+.shelf-row {
+  perspective: 1200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start; /* the shelf starts where the wordmark starts */
+  gap: 3px;
+  width: max-content;
+  min-width: 100%;
+}
+
+.spine {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 0;
+  /* a book meets the shelf square and is rounded only where it is handled */
+  border-radius: 4px 4px 1px 1px;
+  overflow: hidden;
+  cursor: pointer;
+  transform-origin: bottom center;
+  background-blend-mode: overlay;
+  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.spine::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 7px;
+  background: var(--band);
+  border-top: 1px solid rgba(255, 255, 255, 0.22); /* light on the head edge */
+  border-bottom: 1px solid var(--band-line);
+}
+
+.spine::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 30px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.16), transparent);
+}
+
+/* The board is not flat: light catches the rolled edge nearest you, and the
+   binding side falls away. Woven cloth, and a tail band to match the head. */
+.spine-weave {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 3px);
+}
+
+/*
+ * What makes a spine read as a spine rather than a coloured bar: it is round.
+ * Two hinge grooves where the cover folds over the binding, then a cylindrical
+ * wash — dark at both edges, one lit band off centre where the light catches.
+ */
+.spine-round {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 5px, rgba(0, 0, 0, 0.26) 5px 6px, transparent 6px),
+    linear-gradient(270deg, transparent 0 5px, rgba(0, 0, 0, 0.2) 5px 6px, transparent 6px),
+    linear-gradient(90deg,
+      rgba(0, 0, 0, 0.3) 0,
+      rgba(0, 0, 0, 0.1) 6%,
+      transparent 26%,
+      rgba(255, 255, 255, 0.13) 46%,
+      rgba(255, 255, 255, 0.04) 58%,
+      transparent 74%,
+      rgba(0, 0, 0, 0.22) 100%);
+}
+
+.spine-tail {
+  position: absolute;
+  inset: auto 0 6px;
+  height: 4px;
+  background: var(--band);
+  opacity: 0.7;
+}
+
+.foil { position: absolute; right: 10px; left: 7px; height: 1px; background: var(--foil); }
+.foil-top { top: 22px; }
+.foil-bottom { bottom: 28px; }
+.fore-edge { position: absolute; inset: 0 0 0 auto; width: 3px; background: var(--fore-edge); }
+
+.colophon {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border: 1px solid var(--foil);
+}
+
+.spine-title-wrap {
+  position: absolute;
+  top: 30px;
+  right: 7px;
+  bottom: 36px;
+  left: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.spine-title {
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--title);
+}
+
+/* Hover card */
+.note {
+  position: fixed;
+  z-index: 3;
+  /* Informational on hover, so it cannot block the shelf underneath it. */
+  pointer-events: none;
+  width: 318px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--page);
+  text-align: left;
+  transform: translateX(-50%);
+}
+
+/* A focused book's card is interactive — that is when Open matters. */
+.note.is-interactive { pointer-events: auto; }
+
+.note-bar { display: block; height: 5px; }
+.note-inner { padding: 16px 18px 0; }
+
+.note-source {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+/* Two lines, then an ellipsis — the card must not grow to fit its content. */
+.note-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 10px 0 0;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.18;
+  color: var(--ink);
+}
+
+.note-said {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 15px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.note-said span { width: 12px; height: 1px; background: var(--hairline); }
+
+.note-thought {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 9px 0 15px;
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.note-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 18px;
+  border-top: 1px solid var(--hairline);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.note-open { font-weight: 600; letter-spacing: 0.14em; color: var(--accent); }
+.note-status { letter-spacing: 0.12em; color: var(--mute); }
+
+/* Face-out grid */
+.grid-view { position: relative; z-index: 1; padding: 26px var(--margin) 0; }
+
+.grid-count {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.grid-scroll { padding-bottom: 64px; }
+
+.grid { display: grid; grid-template-columns: repeat(6, 186px); gap: 16px 16px; }
+
+.grid-empty { margin: 0; font-size: 14px; color: var(--mute); }
+
+.face {
+  position: relative;
+  width: 186px;
+  height: 258px; /* a book, not a tile */
+  padding: 13px 16px 12px 28px;
+  border: 0;
+  border-radius: 3px 7px 7px 3px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  background-blend-mode: overlay;
+  transition: transform 0.2s ease;
+}
+
+.face:hover { transform: translateY(-4px); }
+
+.face::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 17px;
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.face::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.face-edge { position: absolute; inset: 0 0 0 auto; width: 3px; background: var(--fore-edge); }
+.face-top, .face-bottom { position: relative; z-index: 1; }
+
+.face-source {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.face-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 7px 0 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.face-quote {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.42;
+}
+
+.face-status {
+  margin: 6px 0 0;
+  font-size: 9.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spine, .face, .save-link { transition: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Capture
+ * ------------------------------------------------------------------------ */
+.scrim { position: fixed; inset: 0; z-index: 8; background: rgba(255, 255, 255, 0.72); }
+
+.sheet {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 9;
+  width: 452px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--page);
+  transform: translate(-50%, -50%);
+  text-align: left;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.sheet-close {
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sheet-body { padding: 20px; }
+
+.link-field, .sentence {
+  width: 100%;
+  border: 1px solid var(--hairline);
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.link-field { height: 48px; padding: 0 20px; border-radius: 999px; font-size: 15px; }
+
+.link-field:focus, .sentence:focus, .preview-title:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.preview {
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.preview-chip { width: 26px; height: 36px; flex: none; border-radius: 2px; }
+.preview-text { min-width: 0; flex: 1; }
+
+.preview-source {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.preview-title {
+  width: 100%;
+  margin-top: 6px;
+  padding: 2px 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.sheet-label {
+  margin: 20px 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.sentence {
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.5;
+  resize: none;
+}
+
+.sheet-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.speak-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); }
+
+.shelve {
+  height: 44px;
+  padding: 0 22px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * The band — books lying flat, and the summary beside them
+ * ------------------------------------------------------------------------ */
+.band {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 470px;
+  gap: 64px;
+  align-items: start;
+  padding: 30px var(--margin) 0;
+}
+
+.stack-side { min-width: 0; }
+
+.stack-label {
+  margin: 0 0 14px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #a7a5a1;
+}
+
+.stack { display: flex; flex-direction: column; gap: 9px; max-width: 640px; }
+
+/* A volume seen from the side: the top board, its fore-edge below it. */
+.flat {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 46px;
+  padding: 0 22px 0 30px;
+  border: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  background-blend-mode: overlay;
+  transition: transform 0.2s ease;
+}
+
+.flat:hover { transform: translateX(4px); }
+
+/* the closed spine, at the left end */
+.flat::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 9px;
+  background: rgba(0, 0, 0, 0.22);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* the pages, showing along the bottom */
+.flat::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 9px;
+  height: 3px;
+  background: var(--fore-edge);
+}
+
+.flat-author {
+  flex: none;
+  width: 150px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.flat-title {
+  flex: 1;
+  overflow: hidden;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.flat-part {
+  flex: none;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+@media (prefers-reduced-motion: reduce) { .flat { transition: none; } }
+
+/* Click to focus — the book turns from spine-on to face-on. */
+.shelf.has-focus .spine { opacity: 0.18; }
+
+.shelf .spine.is-focused {
+  opacity: 1;
+  z-index: 5;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.spine { transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease; }
+
+/* Listening — the dot pulses while the microphone is open. */
+.speak[aria-pressed="true"] { border-color: var(--ink); }
+.speak[aria-pressed="true"] .speak-dot { animation: listening 1.3s ease-in-out infinite; }
+
+@keyframes listening {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speak[aria-pressed="true"] .speak-dot { animation: none; }
+}
+
+/* Search — beside the save action, closed until asked for. */
+.hero-actions { display: flex; align-items: center; gap: 10px; margin-top: 26px; }
+.hero-actions .save-link { margin-top: 0; }
+
+.search-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mute);
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.search-toggle svg { width: 14px; height: 14px; }
+.search-toggle:hover { border-color: var(--ink); color: var(--ink); }
+.search-toggle[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+
+.search-field {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.search-field::placeholder { color: var(--mute); }
+.search-field:focus { outline: none; border-color: var(--ink); }
+
+/* ---------------------------------------------------------------------------
+ * The book. A spine click brings it forward, a cover click opens the volume.
+ * Keyframes stay at the top level; declared inside a rule the parser drops
+ * them and the cover mounts with a name and no motion.
+ * ------------------------------------------------------------------------ */
+@keyframes bkRise {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.catcher { position: fixed; inset: 0; z-index: 10; background: transparent; }
+
+/* only the collection recedes */
+.shelf-row { transition: opacity 0.32s ease; }
+
+.book {
+  position: fixed;
+  bottom: calc(var(--floor) + 96px);
+  left: 50%;
+  z-index: 11;
+  transform: translateX(-50%);
+  animation: bkRise 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  /* Every book opens in the same place, whichever spine was clicked. */
+  width: 276px;
+  height: 334px;
+  perspective: 800px; /* shorter throw, so the lean reads as depth not skew */
+}
+
+/*
+ * Nothing else says the cover is the way in, so something has to. It sits
+ * against the middle of the cover rather than its top corner — up there it
+ * ran into the save button in the page's own header.
+ */
+.hint {
+  position: absolute;
+  top: 50%;
+  left: 296px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap; /* two words, one line — it never wraps to "click / me" */
+  color: var(--mute);
+  pointer-events: none;
+  animation: hintNudge 1.8s ease-in-out infinite;
+}
+
+.hint svg { width: 15px; height: 9px; }
+
+@keyframes hintNudge {
+  0%, 100% { transform: translate(0, -50%); }
+  50% { transform: translate(-5px, -50%); }
+}
+
+/* the cover itself */
+.cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 276px;
+  height: 334px;
+  border-radius: 3px 5px 5px 3px; /* tight at the spine, rounder at the fore edge */
+  overflow: hidden;
+  cursor: pointer;
+
+  /*
+   * Tilt — the open cover leans toward the cursor within its own area. The
+   * transition is what makes it follow rather than snap: the angles are set on
+   * every mousemove and the cover is always easing toward the last one.
+   */
+  transform: translateZ(22px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.cover-weave {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.045) 0 1px, transparent 1px 3px);
+}
+
+.cover-spine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.17);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cover-spine span {
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.cover-titles { position: absolute; top: 34px; left: 38px; right: 34px; }
+
+.cover-source {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.cover-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  margin: 12px 0 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.cover-art { position: absolute; top: 104px; right: 34px; bottom: 96px; left: 38px; }
+.cover-art span { position: absolute; inset: 0; }
+
+.cover-foot { position: absolute; left: 38px; right: 34px; bottom: 30px; }
+.cover-rule { display: block; width: 14px; height: 1px; background: currentColor; opacity: 0.5; }
+
+.cover-words { margin: 10px 0 0; font-size: 11px; font-style: italic; }
+
+.cover-status {
+  margin: 6px 0 0;
+  font-size: 8.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.cover-colophon {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  width: 11px;
+  height: 11px;
+  border: 1px solid currentColor;
+  border-radius: 50% 50% 50% 2px;
+  opacity: 0.55;
+}
+
+/* the page block along the foot */
+.cover-block {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 6px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.26), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book, .hint { animation: none; }
+  .cover { transform: none; transition: none; }
+}
+
+/* the cloth layer on a face-out card */
+.face-weave { position: absolute; inset: 0; pointer-events: none; }

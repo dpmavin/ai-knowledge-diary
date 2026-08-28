@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Enable the microphone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="popup.css?v=3" />
+  </head>
+  <body class="permission-page">
+    <main id="popup">
+      <section class="state state-centred">
+        <p class="confirm">Let the extension hear you</p>
+        <p class="meta empty-hint">
+          Chrome asks once. After you allow it, the microphone works inside the
+          popup every time.
+        </p>
+        <button id="ask" class="btn btn-filled">Allow microphone</button>
+        <p class="meta" id="result"></p>
+      </section>
+    </main>
+    <script src="permission.js"></script>
+  </body>
+</html>

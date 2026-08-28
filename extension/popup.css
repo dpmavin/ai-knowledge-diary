@@ -1,0 +1,307 @@
+/* Tokens — DESIGN.md. No build step here, so this is a hand copy of the app's. */
+:root {
+  --page: #ffffff;
+  --surface: #f4f3f1;
+  --ink: #0a0a0a;
+  --mute: #6e6e6b;
+  --hairline: #e8e6e3;
+  --accent: #b0562f;
+
+  --display: "Josefin Sans", system-ui, sans-serif;
+  --sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/*
+ * The flower is the pointer here too, so the extension feels like the app it
+ * saves into. `*` rather than body: every button and field sets its own cursor
+ * and an inherited value would lose to all of them.
+ */
+*,
+*::before,
+*::after {
+  cursor: url("flower-cursor.png") 14 14, auto;
+}
+
+/* Chrome paints its own ground behind the popup, so the corners only read as
+   round if that ground is let through and the body clips to the radius. */
+html { background: transparent; }
+
+body {
+  width: 452px;
+  margin: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.sheet-head { border-radius: 20px 20px 0 0; }
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 20px 10px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.sheet-close {
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sheet-body { padding: 18px 20px 20px; }
+
+/*
+ * A display rule beats the hidden attribute, so .state-centred's flex was
+ * keeping every state on screen at once — saving, saved and empty all stacked
+ * under the form. Nothing hides without this.
+ */
+[hidden] { display: none !important; }
+
+/* One quiet line naming the page, in place of the card that previewed it. */
+.origin {
+  margin: 0 0 20px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--mute);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.origin b {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.state { display: block; }
+
+.state-centred {
+  display: flex;
+  min-height: 116px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.meta {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.empty-hint { max-width: 280px; text-transform: none; letter-spacing: 0; line-height: 1.6; }
+
+.confirm {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.sheet-label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.passage, .sentence {
+  width: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  resize: none;
+}
+
+/* Their words, so they sit under yours — and smaller means more of the
+   passage is visible before it scrolls. */
+.passage {
+  max-height: 108px;
+  padding: 13px 15px;
+  color: var(--mute);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-y: auto;
+}
+
+.sentence {
+  padding: 14px 16px 52px;
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.passage:focus, .sentence:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.sheet-label + .field { margin-bottom: 0; }
+.field { position: relative; }
+
+#mic {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+#mic svg { width: 18px; height: 18px; display: block; }
+
+#mic[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  animation: listening 1.3s ease-in-out infinite;
+}
+
+@keyframes listening {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* One button. The choice of what to keep is made at the top, not down here. */
+.sheet-foot { margin-top: 22px; }
+.sheet-foot .shelve { width: 100%; }
+
+.speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.speak:disabled { color: var(--mute); cursor: default; }
+
+.shelve {
+  height: 44px;
+  padding: 0 22px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mic[aria-pressed="true"] { animation: none; }
+}
+
+/* Tags — which shelf this will land on. */
+.sheet-label-gap { margin-top: 24px; }
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 4px; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* the same plus the shelf uses to save a link */
+.tag-plus { position: relative; width: 7px; height: 7px; }
+.tag-plus i { position: absolute; background: currentColor; inset: 3px 0 auto; height: 1px; }
+.tag-plus i:last-child { inset: 0 3px; width: 1px; height: 100%; }
+
+.tag-field {
+  padding: 6px 9px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  outline: none;
+}
+
+.tag:hover { color: var(--ink); }
+
+/* there is no highlight to choose when nothing was selected */
+.tag:disabled { opacity: 0.35; cursor: default; }
+.tag:disabled:hover { color: var(--mute); }
+
+.tag[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+/* The save has already happened by the time this shows; the only question
+   left is whether you go and look at it. */
+.saved-actions { margin-top: 22px; }
+
+/* The passage is the point of the product, so the choice sits above it and
+   the highlight is what the popup opens on. */
+.scope { margin-bottom: 18px; }
+
+.whole-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--mute);
+}

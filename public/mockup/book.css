@@ -1,0 +1,504 @@
+/* The volume page. Tokens and the paper stock come from home.css. */
+.book-page { overflow: auto; }
+
+.volume {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 336px 1fr;
+  min-height: 100vh;
+}
+
+/* Related — sticky, scrolling on its own */
+.rail {
+  border-right: 1px solid var(--hairline);
+  background: var(--surface);
+}
+
+.rail > * { position: sticky; top: 0; }
+
+.rail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 32px 18px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: var(--mute);
+}
+
+.rail-rule { flex: 1; height: 1px; background: var(--hairline); }
+
+.rail-list {
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
+  padding: 0 32px 48px;
+  scrollbar-width: none;
+}
+
+.rail-list::-webkit-scrollbar { display: none; }
+
+/* No jackets here — nothing in this list is on the shelf yet. */
+.rail-item {
+  display: block;
+  width: 100%;
+  margin-bottom: 22px;
+  padding: 0 0 22px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: none;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rail-item:last-child { margin-bottom: 0; border-bottom: 0; }
+
+/* very small, and the one place on this page that carries the accent */
+.rail-flower {
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  color: var(--accent);
+}
+
+.rail-refresh {
+  border: 0;
+  padding: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--mute);
+  cursor: pointer;
+}
+
+.rail-refresh:hover { color: var(--accent); }
+
+.rail-state {
+  margin: 0 0 24px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.rail-retry {
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 7px 15px;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* the shape of the answer, held while it is being found */
+.rail-item.is-waiting { pointer-events: none; }
+
+.rail-bar {
+  display: block;
+  height: 9px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+  background: var(--hairline);
+  animation: railWait 1.6s ease-in-out infinite;
+}
+
+.rail-bar.is-short { width: 58%; }
+
+@keyframes railWait {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-bar { animation: none; }
+}
+
+.rail-source {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.rail-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 5px 0 0;
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.rail-why {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+/* the entry */
+.entry { position: relative; }
+
+.meta-rail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  margin: 0;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--mute);
+  pointer-events: none;
+}
+
+.entry-inner { max-width: 680px; padding: 40px 40px 96px; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.back svg { width: 13px; height: 13px; }
+
+.entry-head { display: flex; align-items: flex-start; gap: 24px; margin-top: 40px; }
+
+.entry-book {
+  position: relative;
+  width: 98px;
+  height: 126px;
+  flex: none;
+  border-radius: 3px;
+  overflow: hidden;
+  background-blend-mode: overlay;
+}
+
+.entry-book::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.entry-date {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.entry-title {
+  margin: 12px 0 0;
+  font-family: var(--display);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+/* keeps the dot on the same line as the word it follows */
+.entry-tail { white-space: nowrap; }
+
+.entry-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.entry-summary { margin: 0; font-size: 19px; line-height: 1.7; color: var(--ink); }
+
+.entry-section { margin-top: 40px; border-top: 1px solid var(--hairline); padding-top: 30px; }
+
+/* the first section opens the page — nothing above it to rule off from */
+.entry-section.is-lead { border-top: 0; padding-top: 0; }
+
+.entry-label {
+  margin: 0 0 18px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mute);
+}
+
+.points { margin: 0; padding: 0; list-style: none; }
+.points li { margin-bottom: 12px; font-size: 17px; line-height: 1.6; color: var(--mute); }
+
+/* One card per save, so a volume read twice reads as two occasions. */
+.took-card {
+  margin-bottom: 16px;
+  padding: 26px 28px 20px;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background: var(--page);
+}
+
+.took-card:last-child { margin-bottom: 0; }
+
+.took-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.took-when {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.took-count {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.took-thought {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.took-passage {
+  margin: 24px 0 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--hairline);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--mute);
+}
+
+.took-none { margin: 0; font-size: 17px; line-height: 1.6; color: var(--mute); }
+
+/* Leaving and removing are both endings, so they sit together at the foot. */
+.entry-foot { margin-top: 48px; }
+
+.remove-slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.remove-ask {
+  margin: 0;
+  margin-right: auto;
+  font-size: 13px;
+  color: var(--mute);
+}
+
+.remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mute);
+  cursor: pointer;
+}
+
+.remove:hover { color: var(--ink); }
+.remove-yes { color: var(--accent); }
+
+.original {
+  display: block;
+  padding: 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Editing the sentence */
+.entry-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.edit-note {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.took-edit {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.35;
+  resize: none;
+}
+
+.took-edit:focus { outline: none; border-color: var(--ink); }
+
+.took-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.took-actions-right { display: inline-flex; align-items: center; gap: 12px; }
+
+.took-cancel {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.took-none { margin-top: 20px; }
+
+/* Tags — which shelf this is filed on. */
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+
+.tag-label {
+  margin-right: 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mute);
+}
+
+.tag, .tag-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.tag { border-color: var(--ink); color: var(--ink); }
+
+.tag-text, .tag-x {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tag-x { font-size: 13px; line-height: 1; opacity: 0.4; }
+.tag-x:hover { opacity: 1; color: var(--accent); }
+
+.tag-add { border-color: var(--mute); cursor: pointer; }
+.tag-add:hover { color: var(--ink); border-color: var(--ink); }
+
+/* the same plus the shelf uses to save a link */
+.tag-plus { position: relative; width: 8px; height: 8px; }
+.tag-plus i {
+  position: absolute;
+  background: currentColor;
+  inset: 3.5px 0 auto;
+  height: 1px;
+}
+.tag-plus i:last-child { inset: 0 3.5px; width: 1px; height: 100%; }
+
+/* one field, whether the tag is new or being renamed */
+.tag-field {
+  padding: 7px 13px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  outline: none;
+}

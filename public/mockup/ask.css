@@ -1,0 +1,452 @@
+/* ---------------------------------------------------------------------------
+ * Knowledge LLM — the selection pill and the panel it opens.
+ *
+ * Every rule here is either new or scoped under .ask / body.ask-open, so the
+ * shelf and the volume page render exactly as before when the panel is shut.
+ * Tokens come from home.css, which both pages already load.
+ *
+ * --accent appears twice and only twice: the pill's fill and the selection
+ * highlight behind it. Nothing inside the panel carries it.
+ * ------------------------------------------------------------------------ */
+
+:root {
+  --ask-width: 420px;
+  --ask-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --- the way in ---------------------------------------------------------- */
+
+/*
+ * Always available, so the panel is not something you can only reach by
+ * selecting text. Metadata style, matching the panel's own header.
+ */
+.ask-entry {
+  position: fixed;
+  top: 26px;
+  right: var(--margin);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.ask-entry .ask-spark { width: 13px; height: 13px; }
+.ask-entry:hover { color: var(--ink); }
+.ask-entry:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* the panel is right there — no need to point at it */
+body.ask-open .ask-entry { display: none; }
+
+/* --- the pill ------------------------------------------------------------ */
+
+.ask-pill {
+  position: fixed;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px 8px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: url("flower-cursor.png") 14 14, pointer;
+  transform: translate(-50%, -100%);
+  animation: askPill 0.16s var(--ask-ease) both;
+}
+
+.ask-pill:hover { filter: brightness(1.07); }
+
+/* no room above the selection — sit under it instead */
+.ask-pill.is-below { transform: translate(-50%, 0); animation-name: askPillBelow; }
+
+@keyframes askPillBelow {
+  from { opacity: 0; transform: translate(-50%, -5px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.ask-spark { width: 15px; height: 15px; flex: none; }
+
+@keyframes askPill {
+  from { opacity: 0; transform: translate(-50%, calc(-100% + 5px)); }
+  to { opacity: 1; transform: translate(-50%, -100%); }
+}
+
+/* the passage stays lit while the pill is offering to ask about it */
+body.ask-picking ::selection {
+  background: rgba(176, 86, 47, 0.18);
+  color: var(--ink);
+}
+
+/* --- making room --------------------------------------------------------- */
+
+/*
+ * The panel takes width from the page rather than covering it. Everything in
+ * normal flow moves with the body's padding; the two fixed layers on the shelf
+ * screen are pulled in by hand, because padding cannot reach them.
+ */
+body { transition: padding-right 0.28s var(--ask-ease); }
+
+body.ask-open { padding-right: var(--ask-width); }
+
+body.ask-open .shelf { right: calc(var(--margin) + var(--ask-width)); }
+body.ask-open .catcher,
+body.ask-open .scrim { right: var(--ask-width); }
+body.ask-open .book { left: calc(50% - (var(--ask-width) / 2)); }
+
+/* the volume's vertical rail repeats the source, date and status already
+   printed at the top of the page — with the panel open it is just noise
+   pressed against the panel's edge */
+body.ask-open .meta-rail { display: none; }
+
+/*
+ * BUG 2. Shrinking the body was never enough: the hero's right column is a
+ * fixed 470px and the face-out grid is a fixed six columns of 186px. Neither
+ * can give, so the content kept its width and ran under the panel — which is
+ * why the summary was cut off mid-word. These let them shrink, and apply only
+ * while the panel is open, so the closed page computes exactly as before.
+ */
+body.ask-open .hero { grid-template-columns: 1fr minmax(0, 470px); }
+
+/*
+ * Only the prose column. `min-width: 0` removes a grid item's min-content
+ * floor — right, that lets the summary wrap; left, it lets the wordmark spill
+ * straight over the summary, because a single word cannot wrap.
+ */
+body.ask-open .hero-right { min-width: 0; }
+body.ask-open .grid { grid-template-columns: repeat(auto-fill, 186px); }
+
+/* the volume page's rail is fixed at 336px and its prose capped at 680px */
+body.ask-open .volume { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); }
+body.ask-open .entry-inner { max-width: none; }
+
+
+.shelf, .catcher, .scrim, .book {
+  transition: right 0.28s var(--ask-ease), left 0.28s var(--ask-ease);
+}
+
+/* --- the panel ----------------------------------------------------------- */
+
+.ask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  width: var(--ask-width);
+  flex-direction: column;
+  border-left: 1px solid var(--hairline);
+  background: var(--page);
+  animation: askIn 0.28s var(--ask-ease) both;
+}
+
+@keyframes askIn {
+  from { transform: translateX(14px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.ask-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.ask-name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+.ask-tools { display: flex; gap: 4px; margin-left: auto; }
+
+.ask-info {
+  display: inline-flex;
+  width: 17px;
+  height: 17px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1;
+}
+
+.ask-info:hover { border-color: var(--ink); color: var(--ink); }
+.ask-info:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.ask-note {
+  flex: none;
+  margin: 0;
+  padding: 12px 22px 14px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.ask-tool {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--mute);
+  cursor: pointer;
+}
+
+.ask-tool:hover { background: var(--surface); color: var(--ink); }
+.ask-tool svg { width: 16px; height: 16px; }
+.ask-tool:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/*
+ * `hidden` is an attribute and any display rule beats it. `.ask` is flex, so
+ * the panel never actually hid — it was on screen from page load, which is why
+ * it looked as though selecting text opened it. Same fault inside: the empty
+ * state and the quote chip are flex too, hence the empty quote box.
+ */
+.ask[hidden],
+.ask [hidden] { display: none !important; }
+
+/* --- the thread ---------------------------------------------------------- */
+
+.ask-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 22px 8px;
+  scrollbar-width: thin;
+}
+
+.ask-empty { display: flex; height: 100%; flex-direction: column; justify-content: flex-end; }
+
+.ask-empty h2 {
+  margin: 0 0 22px;
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.ask-suggestions { display: grid; gap: 2px; margin: 0 0 8px; padding: 0; list-style: none; }
+
+.ask-suggestion {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ask-suggestion span { flex: none; color: var(--mute); }
+.ask-suggestion:hover { color: var(--ink); }
+.ask-suggestion:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.ask-thread { display: grid; gap: 22px; }
+
+.ask-turn { display: grid; gap: 22px; }
+
+/* mine sits right in a filled bubble; the answer sits left with nothing behind
+   it, so the archive's voice reads as the page rather than as a chat partner */
+.ask-mine {
+  justify-self: end;
+  max-width: 86%;
+  padding: 11px 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.ask-said {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.ask-said.is-error { color: var(--mute); font-style: italic; }
+
+.ask-dots { display: inline-flex; gap: 5px; padding: 4px 0; }
+
+.ask-dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--mute);
+  animation: askDot 1.1s ease-in-out infinite;
+}
+
+.ask-dots i:nth-child(2) { animation-delay: 0.16s; }
+.ask-dots i:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes askDot {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+/* --- the foot ------------------------------------------------------------ */
+
+.ask-foot { flex: none; padding: 12px 34px 24px; }
+
+.ask-quote {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 11px 12px 11px 14px;
+  border-left: 2px solid var(--hairline);
+  border-radius: 0 10px 10px 0;
+  background: var(--surface);
+}
+
+.ask-quote p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--mute);
+}
+
+.ask-drop {
+  flex: none;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mute);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ask-drop:hover { color: var(--ink); }
+
+.ask-field {
+  display: flex;
+  /* the arrow sits on the field's centre line, not on its floor */
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px 6px 16px;
+  border: 1px solid transparent;
+  border-radius: 22px;
+  background: var(--surface);
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+/*
+ * Resting, the field is the fill alone — it reads as part of the panel. Focus
+ * brings up a soft edge rather than a black outline: enough to say the caret
+ * is here, not enough to draw the eye away from the answer above it.
+ */
+.ask-field:focus-within {
+  border-color: var(--hairline);
+  background: var(--page);
+}
+
+.ask-input {
+  flex: 1;
+  max-height: 120px;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+  resize: none;
+  outline: none;
+}
+
+.ask-input::placeholder { color: var(--mute); }
+
+.ask-send {
+  display: inline-flex;
+  width: 29px;
+  height: 29px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.ask-send:disabled { background: var(--hairline); color: var(--mute); cursor: default; }
+.ask-send svg { width: 14px; height: 14px; }
+
+/* --- narrow: a sheet from the bottom, and the page keeps its full width --- */
+
+@media (max-width: 900px) {
+  body.ask-open { padding-right: 0; }
+  body.ask-open .shelf { right: var(--margin); }
+  body.ask-open .catcher,
+  body.ask-open .scrim { right: 0; }
+  body.ask-open .book { left: 50%; }
+
+  .ask {
+    top: auto;
+    left: 0;
+    height: 85vh;
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--hairline);
+    border-radius: 18px 18px 0 0;
+    animation-name: askUp;
+  }
+
+  @keyframes askUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body, .shelf, .catcher, .scrim, .book { transition: none; }
+  .ask, .ask-pill { animation: none; }
+  .ask-dots i { animation: none; opacity: 0.6; }
+}

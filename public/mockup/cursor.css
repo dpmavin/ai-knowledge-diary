@@ -1,0 +1,17 @@
+/* ---------------------------------------------------------------------------
+ * The flower is the pointer.
+ *
+ * It has to be `*` rather than `body`: cursor inherits, but any element that
+ * sets its own — the spines, the shelf's grab, every button, every text field —
+ * would win over an inherited value and the flower would vanish over exactly
+ * the parts of the page you spend time on.
+ *
+ * The hotspot sits at 14 14, the middle of the 28px mark, which is the open
+ * centre of the flower — so the thing you are pointing at shows through it.
+ * `auto` is the fallback for the moment before the image loads.
+ * ------------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+  cursor: url("flower-cursor.png") 14 14, auto;
+}

@@ -1,0 +1,154 @@
+/* Demo scaffolding only. Not part of the extension. */
+.demo-body {
+  width: auto;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+.chrome {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--page);
+}
+
+.chrome-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.chrome-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--hairline);
+}
+
+.chrome-url {
+  flex: 1;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--mute);
+  font-size: 13px;
+}
+
+.chrome-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.chrome-icon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--warm);
+}
+
+.demo-hint {
+  margin: 0;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--mute);
+  font-size: 13px;
+  text-align: center;
+}
+
+.demo-hint b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.article {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 56px 24px 0;
+}
+
+.article-kicker {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+}
+
+.article-title {
+  margin: 14px 0 0;
+  font-family: var(--display);
+  font-size: 44px;
+  font-weight: 300;
+  line-height: 1.05;
+}
+
+.article-byline {
+  margin: 10px 0 40px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+}
+
+.article p:not(.article-kicker):not(.article-byline) {
+  margin: 0 0 26px;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.article ::selection {
+  background: rgba(176, 86, 47, 0.18);
+}
+
+/* the popup, anchored where Chrome would put it */
+.popup-shell {
+  position: fixed;
+  top: 62px;
+  right: 20px;
+  z-index: 10;
+  width: 390px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--ground);
+  overflow: hidden;
+}
+
+.receipt {
+  max-width: 660px;
+  margin: 48px auto 0;
+  padding: 20px 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+.receipt-label {
+  margin-bottom: 10px;
+}
+
+.receipt pre {
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--mute);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

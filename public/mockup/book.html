@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Volume · My knowledge diary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="home.css?v=67" />
+    <link rel="stylesheet" href="ask.css?v=67" />
+    <link rel="stylesheet" href="cursor.css?v=67" />
+    <link rel="stylesheet" href="book.css?v=67" />
+  </head>
+  <body class="book-page">
+    <div class="stock" aria-hidden="true">
+      <span class="stock-fiber"></span>
+      <span class="stock-crumple"></span>
+      <span class="stock-folds"></span>
+      <span class="stock-drops"></span>
+      <span class="stock-tint"></span>
+    </div>
+
+    <div class="volume">
+      <aside class="rail">
+        <div class="rail-head">
+          <span>Sourced by AI</span><span class="rail-rule"></span>
+          <button class="rail-refresh" id="rail-refresh" type="button"
+                  aria-label="Look again">Look again</button>
+        </div>
+        <div class="rail-list" id="rail"></div>
+      </aside>
+
+      <main class="entry">
+        <p class="meta-rail" id="meta-rail"></p>
+
+        <div class="entry-inner">
+          <a class="back" href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 5 8 12l7 7" />
+            </svg>
+            My knowledge diary
+          </a>
+
+          <div class="entry-head">
+            <span class="entry-book" id="entry-book"></span>
+            <div>
+              <p class="entry-date" id="entry-date"></p>
+              <h1 class="entry-title" id="entry-title"></h1>
+              <div class="tags" id="tags"></div>
+            </div>
+          </div>
+
+          <section class="entry-section is-lead" id="summary-section">
+            <h2 class="entry-label">What this is</h2>
+            <p class="entry-summary" id="entry-summary"></p>
+          </section>
+
+          <section class="entry-section">
+            <h2 class="entry-label">Key takeaways</h2>
+            <ul class="points" id="points"></ul>
+          </section>
+
+          <section class="entry-section">
+            <div class="entry-label-row">
+              <h2 class="entry-label">My thoughts</h2>
+              <span class="took-count" id="took-count"></span>
+            </div>
+            <div id="took"></div>
+          </section>
+
+          <div class="entry-foot">
+            <a class="original" id="original" href="#" target="_blank" rel="noreferrer">
+              Open the original
+            </a>
+            <div class="remove-slot" id="remove-slot"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="data.js?v=67"></script>
+    <script src="shared.js?v=67"></script>
+    <script src="book.js?v=67"></script>
+    <script src="ask.js?v=67"></script>
+  </body>
+</html>

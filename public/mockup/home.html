@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My knowledge diary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="home.css?v=67" />
+    <link rel="stylesheet" href="ask.css?v=67" />
+    <link rel="stylesheet" href="cursor.css?v=67" />
+  </head>
+  <body>
+    <div class="stock" aria-hidden="true">
+      <span class="stock-fiber"></span>
+      <span class="stock-crumple"></span>
+      <span class="stock-folds"></span>
+      <span class="stock-drops"></span>
+      <span class="stock-tint"></span>
+    </div>
+
+    <header class="hero">
+      <div class="hero-left">
+        <h1 class="wordmark">My knowledge<br />diary</h1>
+        <p class="theme-label">Genres · sorted for you</p>
+        <nav class="themes" id="themes" aria-label="Themes"></nav>
+      </div>
+
+      <div class="hero-right">
+        <span class="rule"></span>
+        <div class="hero-head">
+          <span class="hero-head-left">Latest interests</span>
+          <span class="hero-head-right" id="total"></span>
+        </div>
+        <p class="summary-body"></p>
+        <p class="summary-from" id="from"></p>
+
+        <div class="hero-actions">
+          <button class="save-link" id="open-sheet" type="button">
+            <span class="plus" aria-hidden="true"><i></i><i></i></span>
+            Save a link
+          </button>
+
+          <button class="search-toggle" id="open-search" type="button"
+                  aria-label="Search your shelf" title="Search your shelf">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4.5 4.5" />
+            </svg>
+          </button>
+
+          <input class="search-field" id="search" type="search" hidden
+                 placeholder="Search your shelf" />
+        </div>
+      </div>
+    </header>
+
+    <section class="grid-view" id="grid-view" hidden>
+      <p class="grid-count" id="grid-count"></p>
+      <div class="grid-scroll" id="grid-scroll"><div class="grid" id="grid"></div></div>
+    </section>
+
+    <div class="shelf" id="shelf"><div class="shelf-row" id="row"></div></div>
+    <div class="note" id="note" hidden></div>
+
+    <!-- purely to close on an outside click; it dims nothing itself -->
+    <div class="catcher" id="catcher" hidden></div>
+
+    <div class="book" id="book" hidden>
+      <div class="cover" id="cover"></div>
+      <span class="hint" aria-hidden="true">
+        <svg viewBox="0 0 15 9" fill="none" stroke="currentColor" stroke-width="1.2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4.5H1.5" />
+          <path d="M5 1 1.5 4.5 5 8" />
+        </svg>
+        click me
+      </span>
+    </div>
+
+    <div class="scrim" id="scrim" hidden></div>
+    <section class="sheet" id="sheet" hidden aria-label="Add to the shelf">
+      <header class="sheet-head">
+        <span>Add to the shelf</span>
+        <button class="sheet-close" id="sheet-close" type="button" aria-label="Close">×</button>
+      </header>
+      <div class="sheet-body">
+        <input class="link-field" id="link" type="url" placeholder="Paste a link" />
+        <div class="preview" id="preview" hidden>
+          <span class="preview-chip" id="preview-chip"></span>
+          <div class="preview-text">
+            <p class="preview-source" id="preview-source"></p>
+            <input class="preview-title" id="preview-title" type="text" />
+          </div>
+        </div>
+        <p class="sheet-label">Why it mattered</p>
+        <textarea class="sentence" id="sentence" rows="3"
+                  placeholder="One sentence, in your words"></textarea>
+        <div class="sheet-foot">
+          <button class="speak" id="speak" type="button">
+            <span class="speak-dot"></span><span class="speak-label">Speak it</span>
+          </button>
+          <button class="shelve" id="shelve" type="button">Put it on the shelf</button>
+        </div>
+      </div>
+    </section>
+
+    <script src="data.js?v=67"></script>
+    <script src="shared.js?v=67"></script>
+    <script src="home.js?v=67"></script>
+    <script src="ask.js?v=67"></script>
+  </body>
+</html>

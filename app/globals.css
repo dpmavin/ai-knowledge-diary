@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* Tokens — see DESIGN.md. Nothing here without a line in that file. */
+:root {
+  --ground: #edebe8;
+  --page: #ffffff;
+  --surface: #f4f3f1;
+  --ink: #0a0a0a;
+  --mute: #6e6e6b;
+  --hairline: #e8e6e3;
+  --warm: #b0562f;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-hairline: var(--hairline);
+  --color-warm: var(--warm);
+
+  --font-display: var(--font-josefin);
+  --font-sans: var(--font-inter);
+
+  --radius-card: 16px;
+  --radius-cover: 20px;
+  --radius-pill: 999px;
+}
+
+html {
+  background: var(--ground);
+}
+
+body {
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.app-frame {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--ground);
+}
+
+/*
+ * Paper. A seamless cold-press tooth from transparenttextures.com
+ * (public/texture/paper.png), laid over --ground.
+ *
+ * grayscale() strips the tile's own blue cast and multiply keeps only its
+ * light-and-dark, so the ground colour is still exactly --ground — the texture
+ * imprints the paper without repainting it. Fixed, so it reads as the sheet the
+ * app is printed on rather than something that scrolls with the content.
+ */
+.app-frame::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  mix-blend-mode: multiply;
+  filter: grayscale(1) contrast(1.55);
+  background-image: url("/texture/paper.png");
+  background-repeat: repeat;
+  background-size: 500px 500px;
+}
+
+/* Metadata: Inter 12px uppercase, 0.08em tracking, --mute */
+.meta {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+}
+
+/* Tilt is pointer-driven, so the global transition reset does not reach it.
+   Flattening the perspective is what actually stops it. */
+@media (prefers-reduced-motion: reduce) {
+  [style*="perspective(1000px)"] {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* A spine carries both sizes; the breakpoint picks one. */
+.spine {
+  width: var(--sw-m);
+  height: var(--sh-m);
+}
+
+@media (min-width: 768px) {
+  .spine {
+    width: var(--sw-d);
+    height: var(--sh-d);
+  }
+}
