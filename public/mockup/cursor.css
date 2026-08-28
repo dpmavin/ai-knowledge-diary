@@ -1,17 +1,19 @@
 /* ---------------------------------------------------------------------------
- * The flower is the pointer.
+ * The flower is the pointer, everywhere.
  *
- * It has to be `*` rather than `body`: cursor inherits, but any element that
- * sets its own — the spines, the shelf's grab, every button, every text field —
- * would win over an inherited value and the flower would vanish over exactly
- * the parts of the page you spend time on.
+ * `*` on its own is not enough. The universal selector carries the lowest
+ * specificity there is, so every `.spine { cursor: pointer }`, `.theme`,
+ * `.shelf { cursor: grab }` and button rule in home.css and book.css beats it,
+ * and over plain text the browser's own I-beam wins. Those are exactly the
+ * places the pointer spends its time, so the flower vanished wherever it
+ * mattered. !important is the blunt instrument, and here it is the correct
+ * one: the intent is genuinely "this cursor, always, no exceptions".
  *
- * The hotspot sits at 14 14, the middle of the 28px mark, which is the open
- * centre of the flower — so the thing you are pointing at shows through it.
- * `auto` is the fallback for the moment before the image loads.
+ * The hotspot sits at 14 14 — the open centre of the 28px mark — so whatever
+ * is being pointed at shows through the hole in the middle.
  * ------------------------------------------------------------------------ */
 *,
 *::before,
 *::after {
-  cursor: url("flower-cursor.png") 14 14, auto;
+  cursor: url("flower-cursor.png") 14 14, auto !important;
 }

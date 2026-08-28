@@ -21,7 +21,9 @@
 *,
 *::before,
 *::after {
-  cursor: url("flower-cursor.png") 14 14, auto;
+  /* !important because every button and field here sets its own cursor, and
+     a class selector beats the universal one every time */
+  cursor: url("flower-cursor.png") 14 14, auto !important;
 }
 
 /* Chrome paints its own ground behind the popup, so the corners only read as
