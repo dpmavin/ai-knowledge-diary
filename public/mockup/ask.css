@@ -85,6 +85,12 @@ body.ask-open .ask-entry { display: none; }
   to { opacity: 1; transform: translate(-50%, -100%); }
 }
 
+/* and it stays lit for as long as the panel is quoting it */
+::highlight(ask-quoted) {
+  background: rgba(176, 86, 47, 0.18);
+  color: var(--ink);
+}
+
 /* the passage stays lit while the pill is offering to ask about it */
 body.ask-picking ::selection {
   background: rgba(176, 86, 47, 0.18);

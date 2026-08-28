@@ -192,7 +192,25 @@
   let quote = "";
   let busy = false;
 
+  /*
+   * The passage stays lit on the page for as long as the panel is quoting it.
+   * Done with the CSS Custom Highlight API rather than by wrapping the text in
+   * a span: it paints a live Range without touching the DOM, so the page's own
+   * markup, its event handlers and its layout are all left exactly alone.
+   */
+  const CAN_HIGHLIGHT = typeof CSS !== "undefined" && CSS.highlights;
+
+  function lightUp(range) {
+    if (!CAN_HIGHLIGHT || !range) return;
+    CSS.highlights.set("ask-quoted", new Highlight(range.cloneRange()));
+  }
+
+  function letGo() {
+    if (CAN_HIGHLIGHT) CSS.highlights.delete("ask-quoted");
+  }
+
   function setQuote(text) {
+    if (text === "") letGo();
     quote = text;
     quoteTextEl.textContent = text ? `“${text}”` : "";
     quoteEl.hidden = text === "";
@@ -342,7 +360,7 @@
 
   /* --- opening and closing ----------------------------------------------- */
 
-  function open(withQuote = "") {
+  function open(withQuote = "", range = null) {
     // the shelf's own overlays would sit under the panel; put them away first
     const note = document.getElementById("note");
     if (note) note.hidden = true;
@@ -350,12 +368,14 @@
     if (catcher && !catcher.hidden) catcher.click();
 
     setQuote(withQuote);
+    lightUp(range);
     panel.hidden = false;
     document.body.classList.add("ask-open");
     inputEl.focus();
   }
 
   function close() {
+    letGo();
     panel.hidden = true;
     document.body.classList.remove("ask-open");
     reset();
@@ -399,7 +419,7 @@
 
     const rect = range.getBoundingClientRect();
     if (rect.width === 0 && rect.height === 0) return null;
-    return { text, rect };
+    return { text, rect, range };
   }
 
   const GAP = 8; // how far the pill sits off the selection
@@ -436,10 +456,11 @@
 
     pill.addEventListener("mousedown", (event) => event.preventDefault());
     pill.addEventListener("click", () => {
-      const text = found.text;
+      const { text, range } = found;
       dropPill();
+      // paint it first, then drop the native selection it was made from
+      open(text, range);
       window.getSelection()?.removeAllRanges();
-      open(text);
     });
 
     document.body.append(pill);
