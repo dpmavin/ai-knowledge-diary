@@ -9,3 +9,8 @@ skills-lock.json
 
 node_modules
 .next
+
+# video assets — local only, never shipped
+/public/clutter
+/public/problem
+/public/toggle

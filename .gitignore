@@ -45,3 +45,8 @@ next-env.d.ts
 /.agents
 /.claude
 /skills-lock.json
+
+# video assets — local only, never shipped
+/public/clutter
+/public/problem
+/public/toggle
