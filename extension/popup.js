@@ -1,7 +1,7 @@
 // Capture only. The extension never displays the library.
 
-// APP_ORIGIN and SHELF_PATH come from config.js — the one place to change them.
-const SHELF_URL = `${APP_ORIGIN}${SHELF_PATH}`;
+// APP_ORIGINS and SHELF_PATH come from config.js.
+const TAB_PATTERNS = APP_ORIGINS.map((origin) => `${origin}/*`);
 const INBOX_KEY = "librarySaves";
 
 /**
@@ -11,15 +11,16 @@ const INBOX_KEY = "librarySaves";
  */
 function originIsGranted() {
   const granted = chrome.runtime.getManifest().host_permissions ?? [];
-  return granted.some((pattern) => pattern.startsWith(`${APP_ORIGIN}/`));
+  return APP_ORIGINS.every((origin) =>
+    granted.some((pattern) => pattern.startsWith(`${origin}/`)));
 }
 
 const originOk = originIsGranted();
 if (!originOk) {
   console.error(
-    `Library: config.js points at ${APP_ORIGIN}, which is not in manifest.json's ` +
-      `host_permissions (${chrome.runtime.getManifest().host_permissions?.join(", ") || "none"}). ` +
-      "Add it there and to content_scripts[0].matches, then reload the extension.",
+    `Library: config.js lists ${APP_ORIGINS.join(", ")}, but manifest.json grants ` +
+      `${chrome.runtime.getManifest().host_permissions?.join(", ") || "nothing"}. ` +
+      "Add the missing origin there and to content_scripts[0].matches, then reload.",
   );
 }
 const PASSAGE_CAP = 1200;
@@ -317,7 +318,8 @@ function buildSave(passage) {
  * shelf is opened. Saving never navigates: you stay on the article.
  */
 async function appendInPage(item) {
-  const tabs = await chrome.tabs.query({ url: `${APP_ORIGIN}/*` });
+  // whichever of the origins actually has a tab open
+  const tabs = await chrome.tabs.query({ url: TAB_PATTERNS });
   if (tabs.length === 0) return false;
 
   await chrome.scripting.executeScript({
@@ -380,9 +382,15 @@ async function commit(passage) {
 /* The save has already happened, so both of these are only about where you go
  * next. Cancel keeps you on the article you were reading. */
 goShelfEl?.addEventListener("click", async () => {
-  const [open] = await chrome.tabs.query({ url: `${APP_ORIGIN}/*` });
-  if (open) await chrome.tabs.update(open.id, { url: SHELF_URL, active: true });
-  else await chrome.tabs.create({ url: SHELF_URL });
+  const [open] = await chrome.tabs.query({ url: TAB_PATTERNS });
+  if (open) {
+    // stay on the origin you were already using
+    const origin = new URL(open.url).origin;
+    await chrome.tabs.update(open.id, { url: origin + SHELF_PATH, active: true });
+  } else {
+    // nothing open — the deployed shelf is the one anyone can reach
+    await chrome.tabs.create({ url: APP_ORIGINS[APP_ORIGINS.length - 1] + SHELF_PATH });
+  }
   window.close();
 });
 
