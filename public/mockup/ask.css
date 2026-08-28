@@ -111,6 +111,7 @@ body.ask-open .book { left: calc(50% - (var(--ask-width) / 2)); }
    printed at the top of the page — with the panel open it is just noise
    pressed against the panel's edge */
 body.ask-open .meta-rail { display: none; }
+body.ask-open .colophon-line { right: var(--ask-width); }
 
 /*
  * BUG 2. Shrinking the body was never enough: the hero's right column is a

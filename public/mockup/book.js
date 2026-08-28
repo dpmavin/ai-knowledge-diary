@@ -527,5 +527,6 @@ async function fillRail(refresh = false) {
 }
 
 // refetching is deliberate, never automatic — the rail is cached for the demo
-document.getElementById("rail-refresh").addEventListener("click", () => fillRail(true));
+// the rail refetches only on an empty or failed result, never on a control
+document.getElementById("rail-refresh")?.addEventListener("click", () => fillRail(true));
 fillRail();
