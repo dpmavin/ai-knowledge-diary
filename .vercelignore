@@ -1,0 +1,11 @@
+# never leaves this machine
+.env
+.env.*
+
+# local tooling, not the product
+.agents
+.claude
+skills-lock.json
+
+node_modules
+.next
