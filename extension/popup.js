@@ -343,20 +343,30 @@ async function appendInPage(item) {
 }
 
 async function persist(item) {
-  // a durable copy, in case neither route below lands
+  /*
+   * Exactly one route, never both.
+   *
+   * This used to keep a copy in chrome.storage as insurance AND inject into an
+   * open tab. The tab turned its copy into a fragment straight away, and then
+   * the next time the shelf loaded bridge.js handed over the storage copy and
+   * it became a second, identical fragment. One highlight, two entries.
+   *
+   * So: write into the page if a tab is open, and only fall back to storage
+   * when it is not. The insurance was buying a duplicate, not resilience.
+   */
+  try {
+    if (await appendInPage(item)) return "live";
+  } catch {
+    // no library tab, or the injection was refused — fall through
+  }
+
   try {
     const existing = await chrome.storage.local.get(INBOX_KEY);
     const queue = Array.isArray(existing[INBOX_KEY]) ? existing[INBOX_KEY] : [];
     queue.push(item);
     await chrome.storage.local.set({ [INBOX_KEY]: queue });
   } catch {
-    // storage unavailable; the routes below still work
-  }
-
-  try {
-    if (await appendInPage(item)) return "live";
-  } catch {
-    // no library tab, or injection refused — bridge.js will deliver it
+    // storage unavailable and no tab open — nothing left to try
   }
   return "waiting";
 }

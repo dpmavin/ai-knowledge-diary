@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Library \u2014 capture",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Highlight a passage, say why it matters, and it becomes a book on your shelf.",
   "permissions": [
     "activeTab",

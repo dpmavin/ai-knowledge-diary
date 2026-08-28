@@ -259,6 +259,17 @@ function drainInbox() {
      */
     const book = at < BOOKS.length ? seeded[at] : added[at - BOOKS.length];
     const current = fragmentsOf(book);
+
+    /*
+     * The same fragment arriving twice is a delivery fault, not a second
+     * reading. Two routes used to carry every save and both could land.
+     */
+    const already = current.some(
+      (f) =>
+        (fragment.date !== "" && f.date === fragment.date) ||
+        (f.passage === fragment.passage && f.thought === fragment.thought),
+    );
+    if (already) continue;
     // a volume saved as a whole link has an empty slot; fill it rather than
     // leaving a blank card above the real one
     const next =
