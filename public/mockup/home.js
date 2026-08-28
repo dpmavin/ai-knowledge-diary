@@ -80,6 +80,7 @@ function buildSpine(book, index) {
     index: String(book.at),
     title: book.full,
     source: book.source,
+    platform: platformOf(book.link, book.source),
     theme: book.theme,
     thought: book.thought,
     colour: book.colour,
@@ -159,7 +160,7 @@ function showNote(spine) {
 
   noteEl.innerHTML = `
     <div class="note-inner">
-      <p class="note-source">${escapeHtml(spine.dataset.source)} article</p>
+      <p class="note-source">${escapeHtml(spine.dataset.platform)}</p>
       <p class="note-title">${escapeHtml(spine.dataset.title)}</p>
       <p class="note-said"><span></span>${thought ? "You said" : "Nothing said yet"}</p>
       <p class="note-thought">${

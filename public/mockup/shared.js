@@ -141,6 +141,38 @@ function saveAdded(list) {
   }
 }
 
+/*
+ * Where a save came from, as a person would name it. The seed stores a
+ * publication or author in `source`; what the card wants is the platform, and
+ * the link is the only thing that actually knows. Anything unrecognised falls
+ * back to its own domain, which is still truer than guessing.
+ */
+const PLATFORMS = [
+  [/(^|\.)medium\.com$/, "Medium"],
+  [/(^|\.)linkedin\.com$/, "LinkedIn"],
+  [/(^|\.)reddit\.com$/, "Reddit"],
+  [/(^|\.)(x|twitter)\.com$/, "X"],
+  [/(^|\.)substack\.com$/, "Substack"],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, "YouTube"],
+  [/(^|\.)wikipedia\.org$/, "Wikipedia"],
+  [/(^|\.)github\.com$/, "GitHub"],
+  [/(^|\.)arxiv\.org$/, "arXiv"],
+  [/(^|\.)notion\.(so|site)$/, "Notion"],
+];
+
+function platformOf(link, fallback = "") {
+  let host = "";
+  try {
+    host = new URL(link).hostname.replace(/^www\./, "");
+  } catch {
+    return fallback;
+  }
+  for (const [pattern, name] of PLATFORMS) {
+    if (pattern.test(host)) return name;
+  }
+  return host || fallback;
+}
+
 /** Deterministic, so a book never changes width between renders. */
 function sizeFor(key) {
   let seed = 0;
