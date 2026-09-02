@@ -24,6 +24,17 @@
         "What have I been reading about lately?",
       ];
 
+  /*
+   * The server answers with this marker alone when a question isn't about the
+   * archive. The sentence below is written here rather than by the model, so a
+   * refusal reads the same way every time — and the suggestions offered with it
+   * are the same ones the empty state offers, which are already page-aware.
+   */
+  const OUT_OF_SCOPE = "<<OUT_OF_SCOPE>>";
+  const REFUSAL =
+    "This question is out of scope for this chat bot — try using Claude or " +
+    "ChatGPT! I can help you with:";
+
   const SPARK =
     '<svg class="ask-spark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
     '<path d="M12 1.6c.9 5.2 3.3 7.6 8.5 8.5-5.2.9-7.6 3.3-8.5 8.5-.9-5.2-3.3-7.6-8.5-8.5 5.2-.9 7.6-3.3 8.5-8.5Z"/>' +
@@ -172,7 +183,7 @@
   const quoteEl = panel.querySelector("#ask-quote");
   const quoteTextEl = panel.querySelector("#ask-quote-text");
 
-  SUGGESTIONS.forEach((text) => {
+  function suggestionItem(text) {
     const li = document.createElement("li");
     const button = document.createElement("button");
     button.type = "button";
@@ -183,8 +194,23 @@
     button.append(arrow, document.createTextNode(text));
     button.addEventListener("click", () => ask(text));
     li.append(button);
-    panel.querySelector("#ask-suggestions").append(li);
-  });
+    return li;
+  }
+
+  const suggestionsEl = panel.querySelector("#ask-suggestions");
+  SUGGESTIONS.forEach((text) => suggestionsEl.append(suggestionItem(text)));
+
+  /** The refusal, drawn in place of an answer: the sentence, then the way out. */
+  function drawRefusal(said) {
+    said.textContent = "";
+    const line = document.createElement("p");
+    line.textContent = REFUSAL;
+    const list = document.createElement("ul");
+    list.className = "ask-suggestions";
+    list.style.marginTop = "10px";
+    SUGGESTIONS.forEach((text) => list.append(suggestionItem(text)));
+    said.append(line, list);
+  }
 
   /* --- conversation ------------------------------------------------------ */
 
@@ -274,12 +300,22 @@
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let answer = "";
-      said.textContent = "";
+      let painting = false;
 
       for (;;) {
         const { value, done } = await reader.read();
         if (done) break;
         answer += decoder.decode(value, { stream: true });
+        /*
+         * While what has arrived could still turn out to be the out-of-scope
+         * marker, the dots stay up — painting as it streams would flash
+         * "<<OUT_OF" on screen before the refusal replaces it.
+         */
+        if (!painting) {
+          if (OUT_OF_SCOPE.startsWith(answer.trimStart())) continue;
+          said.textContent = "";
+          painting = true;
+        }
         said.textContent = answer;
         scrollDown();
       }
@@ -292,7 +328,8 @@
       const text = at === -1 ? answer : answer.slice(0, at);
       const failure = at === -1 ? "" : answer.slice(at + 1);
 
-      said.textContent = text.trim() === "" ? "" : text;
+      const trimmed = text.trim();
+      said.textContent = trimmed === "" || trimmed === OUT_OF_SCOPE ? "" : text;
 
       if (failure) {
         const line = document.createElement("p");
@@ -302,7 +339,11 @@
         said.append(line);
         // a half-answer is not worth carrying into the next turn
         turns.pop();
-      } else if (text.trim() === "") {
+      } else if (trimmed === OUT_OF_SCOPE) {
+        drawRefusal(said);
+        // the thread keeps the refusal in words, so a follow-up still reads
+        turns.push({ role: "assistant", content: REFUSAL });
+      } else if (trimmed === "") {
         said.textContent = "No answer came back.";
       } else {
         turns.push({ role: "assistant", content: text });
